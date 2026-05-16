@@ -36,18 +36,14 @@ export function userComplete(opts: UserCompleteOpts): void {
 }
 
 type ResultOfTerm = { term: string } & UserCompleteResult;
-
-export const fetchUsers = async (
-  term: string,
-  { friend, tour, swiss, team }: Partial<UserCompleteOpts>,
-): Promise<ResultOfTerm> => {
+export const fetchUsers = async (term: string, opts: Partial<UserCompleteOpts>): Promise<ResultOfTerm> => {
   const result = await xhr.json(
     xhr.url('/api/player/autocomplete', {
       term,
-      friend: friend ? 1 : 0,
-      tour,
-      swiss,
-      team,
+      friend: opts.friend ? 1 : 0,
+      tour: opts.tour,
+      swiss: opts.swiss,
+      team: opts.team,
       object: 1,
     }),
   );
@@ -61,10 +57,31 @@ export const checkDebouncedResultAgainstTerm =
 
 export const renderUserEntry = (o: LightUserOnline, tag = 'a'): string => {
   const patronClass = o.patronColor ? ` paco${o.patronColor}` : '';
-  const hrefAttr = tag === 'a' ? 'href' : 'data-href';
-  const title = o.title
-    ? `<span class="utitle"${o.title === 'BOT' ? ' data-bot="data-bot"' : ''}>${o.title}</span>&nbsp;`
-    : '';
-  const flair = o.flair ? `<img class="uflair" src="${site.asset.flairSrc(o.flair)}" alt="" />` : '';
-  return `<${tag} class="complete-result ulpt user-link${o.online ? ' online' : ''}" ${hrefAttr}="/@/${o.name}"><icon class="line${o.patron ? ' patron' : ''}${patronClass}"></icon>${title}${o.name}${flair}</${tag}>`;
+  return (
+    '<' +
+    tag +
+    ' class="complete-result ulpt user-link' +
+    (o.online ? ' online' : '') +
+    '" ' +
+    (tag === 'a' ? '' : 'data-') +
+    'href="/@/' +
+    o.name +
+    '">' +
+    '<icon class="line' +
+    (o.patron ? ' patron' : '') +
+    patronClass +
+    '"></icon>' +
+    (o.title
+      ? '<span class="utitle"' +
+        (o.title === 'BOT' ? ' data-bot="data-bot" ' : '') +
+        '>' +
+        o.title +
+        '</span>&nbsp;'
+      : '') +
+    o.name +
+    (o.flair ? '<img class="uflair" src="' + site.asset.flairSrc(o.flair) + '"/>' : '') +
+    '</' +
+    tag +
+    '>'
+  );
 };

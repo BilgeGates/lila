@@ -25,15 +25,10 @@ export function verticalResize(o: Opts): VNode {
       hook: {
         insert: vn => {
           const divider = vn.elm as ResizerElement;
-
-          function getSelectorElement(o: Opts) {
-            return o.selector
+          const onDomChange = () => {
+            const el = o.selector
               ? document.querySelector<HTMLElement>(o.selector)!
               : (divider.previousElementSibling as HTMLElement);
-          }
-
-          const onDomChange = () => {
-            const el = getSelectorElement(o);
             if (el.style.height) return;
             let height = o.id && heightStore(`${o.key}.${o.id}`);
             if (typeof height !== 'number') height = heightStore(o.key) ?? o.initialMaxHeight?.();
@@ -50,7 +45,9 @@ export function verticalResize(o: Opts): VNode {
             safariHack(true);
             divider.classList.add('is-dragging');
 
-            const el = getSelectorElement(o);
+            const el = o.selector
+              ? document.querySelector<HTMLElement>(o.selector)!
+              : (divider.previousElementSibling as HTMLElement);
             const beginFrom = el.getBoundingClientRect().height - down.clientY;
             divider.setPointerCapture(down.pointerId);
 
